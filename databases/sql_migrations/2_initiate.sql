@@ -2,7 +2,7 @@
 -- +migrate StatementBegin
 
 CREATE TABLE category (
-    id SERIAL NOT NULL,
+    id VARCHAR(256) NOT NULL,
     name VARCHAR(256),
     PRIMARY KEY(id)
 );
