@@ -2,23 +2,25 @@ package middleware
 
 import (
 	"fmt"
+	"game-api/utils/structs"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt"
+	jwt "github.com/golang-jwt/jwt/v5"
 )
 
 var SecretKey = []byte(os.Getenv("JWT_SECRET"))
 
-func GenerateJWT() (string, error) {
-	token := jwt.New(jwt.SigningMethodEdDSA)
+func GenerateJWT(Users structs.Users) (string, error) {
+	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 	claims["exp"] = time.Now().Add(10 * time.Minute)
 	claims["authorized"] = true
-	claims["user"] = "username"
-	tokenString, err := token.SignedString(SecretKey)
+	claims["user"] = Users.Email
+	claims["role"] = Users.Roles
+	tokenString, err := token.SignedString([]byte("tes"))
 	if err != nil {
 		return "Signing Error", err
 	}
@@ -49,10 +51,11 @@ func VerifyJWT() gin.HandlerFunc {
 
 			}
 			if token.Valid {
-				_, err2 := ctx.Writer.Write([]byte("token Valid"))
-				if err2 != nil {
-					return
-				}
+				// _, err2 := ctx.Writer.Write([]byte("token Valid"))
+				// if err2 != nil {
+				// 	return
+				// }
+				ctx.Next()
 			} else {
 				ctx.Writer.WriteHeader(http.StatusUnauthorized)
 				_, err := ctx.Writer.Write([]byte("You're Unauthorized due to invalid token"))

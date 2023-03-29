@@ -44,7 +44,7 @@ func isRegister(db *sql.DB, email string) bool {
 func Register(db *sql.DB, Users structs.Users) (err error) {
 
 	if isRegister(db, Users.Email) {
-		return errors.New("email sudah terdaftar")
+		return errors.New("email tidak ditemukan")
 	}
 
 	sqlStatement := "INSERT INTO Users (id,name,email,password) VALUES ($1,$2,$3,$4);"
@@ -57,7 +57,28 @@ func Register(db *sql.DB, Users structs.Users) (err error) {
 	return errs.Err()
 }
 
-// func Login(db *sql.DB, Users structs.Users) (err error) {
+func Login(db *sql.DB, Users structs.Users) (UserData structs.Users, err error) {
+	var User = structs.Users{}
 
-// 	return errs.Err()
-// }
+	sqlStatement := "SELECT * FROM Users WHERE email=$1"
+
+	rows, err := db.Query(sqlStatement, Users.Email)
+
+	if err != nil {
+		return User, errors.New("email tidak ditemukan")
+	}
+
+	for rows.Next() {
+
+		err = rows.Scan(&User.Id, &User.Name, &User.Email, &User.Password, &User.Roles)
+
+		if err != nil {
+			panic(err)
+		}
+		if !CheckPasswordHash(Users.Password, User.Password) {
+			return User, errors.New("password tidak valid")
+		}
+	}
+
+	return User, nil
+}
