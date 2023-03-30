@@ -1,6 +1,6 @@
 -- +migrate Up
 -- +migrate StatementBegin
-CREATE TYPE roleEnum AS ENUM ('user', 'admin');
+
 
 CREATE TABLE users (
     id VARCHAR(256) NOT NULL,

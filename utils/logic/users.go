@@ -44,7 +44,7 @@ func isRegister(db *sql.DB, email string) bool {
 func Register(db *sql.DB, Users structs.Users) (err error) {
 
 	if isRegister(db, Users.Email) {
-		return errors.New("email tidak ditemukan")
+		return errors.New("email sudah teregistrasi")
 	}
 
 	sqlStatement := "INSERT INTO Users (id,name,email,password) VALUES ($1,$2,$3,$4);"

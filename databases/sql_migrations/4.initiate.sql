@@ -2,10 +2,10 @@
 -- +migrate StatementBegin
 
 CREATE TABLE comment (
-    id VARCHAR(256) NOT NULL,
+    id SERIAL NOT NULL,
     text TEXT,
     users_id VARCHAR(256),
-    game_id VARCHAR(256),
+    game_id INT,
     PRIMARY KEY(id),
     CONSTRAINT fk_users
         FOREIGN KEY(users_id)

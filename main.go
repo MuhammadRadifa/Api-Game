@@ -12,6 +12,10 @@ func main() {
 
 	router := gin.Default()
 	routes.UserRoute(router)
+	routes.CategoryRoute(router)
+	routes.GameRoute(router)
+	routes.CommentRoute(router)
+	routes.RatingRoute(router)
 
 	router.Run("localhost:8080")
 }

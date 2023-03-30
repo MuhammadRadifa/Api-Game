@@ -16,11 +16,11 @@ var SecretKey = []byte(os.Getenv("JWT_SECRET"))
 func GenerateJWT(Users structs.Users) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
-	claims["exp"] = time.Now().Add(10 * time.Minute)
+	claims["exp"] = time.Now().Add(200 * time.Minute)
 	claims["authorized"] = true
 	claims["user"] = Users.Email
 	claims["role"] = Users.Roles
-	tokenString, err := token.SignedString([]byte("tes"))
+	tokenString, err := token.SignedString(SecretKey)
 	if err != nil {
 		return "Signing Error", err
 	}
@@ -30,9 +30,10 @@ func GenerateJWT(Users structs.Users) (string, error) {
 
 func VerifyJWT() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		fmt.Println("jalan")
 		if ctx.Request.Header["Token"] != nil {
 			token, err := jwt.Parse(ctx.Request.Header["Token"][0], func(token *jwt.Token) (interface{}, error) {
-				_, ok := token.Method.(*jwt.SigningMethodECDSA)
+				_, ok := token.Method.(*jwt.SigningMethodHMAC)
 				if !ok {
 					ctx.Writer.WriteHeader(http.StatusUnauthorized)
 					_, err := ctx.Writer.Write([]byte("You're Unauthorized"))
@@ -45,17 +46,17 @@ func VerifyJWT() gin.HandlerFunc {
 			if err != nil {
 				ctx.Writer.WriteHeader(http.StatusUnauthorized)
 				_, err2 := ctx.Writer.Write([]byte("You're Unauthorized due to error parsing the JWT"))
+				ctx.Abort()
 				if err2 != nil {
 					return
 				}
 
 			}
 			if token.Valid {
-				// _, err2 := ctx.Writer.Write([]byte("token Valid"))
-				// if err2 != nil {
-				// 	return
-				// }
-				ctx.Next()
+				_, err2 := ctx.Writer.Write([]byte("token Valid"))
+				if err2 != nil {
+					return
+				}
 			} else {
 				ctx.Writer.WriteHeader(http.StatusUnauthorized)
 				_, err := ctx.Writer.Write([]byte("You're Unauthorized due to invalid token"))
@@ -76,9 +77,10 @@ func VerifyJWT() gin.HandlerFunc {
 func ExtractClaims(ctx *gin.Context) (string, error) {
 	if ctx.Request.Header["Token"] != nil {
 		tokenString := ctx.Request.Header["Token"][0]
+		fmt.Println(tokenString)
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 
-			if _, ok := token.Method.(*jwt.SigningMethodECDSA); !ok {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("there's an error with the signing method")
 			}
 			return SecretKey, nil
@@ -88,8 +90,8 @@ func ExtractClaims(ctx *gin.Context) (string, error) {
 		}
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if ok && token.Valid {
-			username := claims["username"].(string)
-			return username, nil
+			user := claims["user"].(string)
+			return user, nil
 		}
 	}
 
