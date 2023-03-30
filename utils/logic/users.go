@@ -62,23 +62,17 @@ func Login(db *sql.DB, Users structs.Users) (UserData structs.Users, err error) 
 
 	sqlStatement := "SELECT * FROM Users WHERE email=$1"
 
-	rows, err := db.Query(sqlStatement, Users.Email)
-
-	if err != nil {
-		return User, errors.New("email tidak ditemukan")
+	if err := db.QueryRow(sqlStatement,
+		Users.Email).Scan(&User.Id, &User.Name, &User.Email, &User.Password, &User.Roles); err != nil {
+		if err == sql.ErrNoRows {
+			return User, errors.New("email tidak ditemukan")
+		}
+		return User, err
 	}
 
-	for rows.Next() {
-
-		err = rows.Scan(&User.Id, &User.Name, &User.Email, &User.Password, &User.Roles)
-
-		if err != nil {
-			panic(err)
-		}
-		if !CheckPasswordHash(Users.Password, User.Password) {
-			return User, errors.New("password tidak valid")
-		}
+	if !CheckPasswordHash(Users.Password, User.Password) {
+		return User, errors.New("password tidak valid")
 	}
 
-	return User, nil
+	return User, err
 }

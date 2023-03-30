@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"game-api/databases"
 	"game-api/middleware"
 	"game-api/utils/logic"
@@ -50,6 +51,8 @@ func Login(c *gin.Context) {
 		})
 		panic(err)
 	}
+
+	fmt.Println(data)
 
 	token, errs := middleware.GenerateJWT(data)
 

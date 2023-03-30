@@ -8,15 +8,16 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	jwt "github.com/golang-jwt/jwt/v5"
+	jwt "github.com/golang-jwt/jwt"
 )
 
 var SecretKey = []byte(os.Getenv("JWT_SECRET"))
 
 func GenerateJWT(Users structs.Users) (string, error) {
+	fmt.Println(Users)
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
-	claims["exp"] = time.Now().Add(200 * time.Minute)
+	claims["exp"] = time.Now().Add(60 * time.Minute)
 	claims["authorized"] = true
 	claims["user"] = Users.Email
 	claims["role"] = Users.Roles
