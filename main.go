@@ -6,6 +6,7 @@ import (
 	"game-api/routes"
 	"os"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -20,6 +21,7 @@ func main() {
 	databases.Connection()
 
 	router := gin.Default()
+	router.Use(cors.Default())
 	routes.UserRoute(router)
 	routes.CategoryRoute(router)
 	routes.GameRoute(router)
