@@ -21,9 +21,9 @@ func Connection() {
 		fmt.Println("failed Load file environment")
 	}
 
-	psqlinfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", os.Getenv("PGHOST"), os.Getenv("PGPORT"), os.Getenv("PGUSER"), os.Getenv("PGPASSWORD"), os.Getenv("PGDATABASE"))
+	// psqlinfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", os.Getenv("PGHOST"), os.Getenv("PGPORT"), os.Getenv("PGUSER"), os.Getenv("PGPASSWORD"), os.Getenv("PGDATABASE"))
 
-	db, err = sql.Open("postgres", psqlinfo)
+	db, err = sql.Open("postgres", os.Getenv("DATABASE_URL"))
 
 	err = db.Ping()
 	if err != nil {
