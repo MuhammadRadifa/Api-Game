@@ -28,5 +28,5 @@ func main() {
 	routes.CommentRoute(router)
 	routes.RatingRoute(router)
 
-	router.Run(":" + os.Getenv("PGPORT"))
+	router.Run("0.0.0.0:" + os.Getenv("PGPORT"))
 }
