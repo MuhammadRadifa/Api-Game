@@ -20,7 +20,9 @@ func main() {
 
 	databases.Connection()
 
-	router := gin.Default()
+	gin.SetMode(gin.ReleaseMode)
+
+	router := gin.New()
 	router.Use(cors.Default())
 	routes.UserRoute(router)
 	routes.CategoryRoute(router)
@@ -28,5 +30,5 @@ func main() {
 	routes.CommentRoute(router)
 	routes.RatingRoute(router)
 
-	router.Run("0.0.0.0:" + os.Getenv("PGPORT"))
+	router.Run(":" + os.Getenv("PGPORT"))
 }
