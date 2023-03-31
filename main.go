@@ -1,13 +1,22 @@
 package main
 
 import (
+	"fmt"
 	"game-api/databases"
 	"game-api/routes"
+	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	err := godotenv.Load("config/.env")
+
+	if err != nil {
+		fmt.Println("failed Load file environment")
+	}
+
 	databases.Connection()
 
 	router := gin.Default()
@@ -17,5 +26,5 @@ func main() {
 	routes.CommentRoute(router)
 	routes.RatingRoute(router)
 
-	router.Run("localhost:8080")
+	router.Run(":" + os.Getenv("PGPORT"))
 }
