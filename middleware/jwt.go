@@ -4,21 +4,20 @@ import (
 	"fmt"
 	"game-api/utils/structs"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	jwt "github.com/golang-jwt/jwt"
+	jwt "github.com/golang-jwt/jwt/v5"
 )
 
-var SecretKey = []byte(os.Getenv("JWT_SECRET"))
+var SecretKey = []byte("tes")
 
 func GenerateJWT(Users structs.Users) (string, error) {
-	fmt.Println(Users)
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
-	claims["exp"] = time.Now().Add(60 * time.Minute)
+	claims["exp"] = time.Now().Add(time.Duration(1) * time.Hour).Unix()
 	claims["authorized"] = true
+	claims["id"] = Users.Id
 	claims["user"] = Users.Email
 	claims["role"] = Users.Roles
 	tokenString, err := token.SignedString(SecretKey)
@@ -31,7 +30,6 @@ func GenerateJWT(Users structs.Users) (string, error) {
 
 func VerifyJWT() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		fmt.Println("jalan")
 		if ctx.Request.Header["Token"] != nil {
 			token, err := jwt.Parse(ctx.Request.Header["Token"][0], func(token *jwt.Token) (interface{}, error) {
 				_, ok := token.Method.(*jwt.SigningMethodHMAC)
@@ -42,7 +40,7 @@ func VerifyJWT() gin.HandlerFunc {
 						return nil, err
 					}
 				}
-				return "", nil
+				return SecretKey, nil
 			})
 			if err != nil {
 				ctx.Writer.WriteHeader(http.StatusUnauthorized)
@@ -54,10 +52,7 @@ func VerifyJWT() gin.HandlerFunc {
 
 			}
 			if token.Valid {
-				_, err2 := ctx.Writer.Write([]byte("token Valid"))
-				if err2 != nil {
-					return
-				}
+				ctx.Next()
 			} else {
 				ctx.Writer.WriteHeader(http.StatusUnauthorized)
 				_, err := ctx.Writer.Write([]byte("You're Unauthorized due to invalid token"))
@@ -75,24 +70,34 @@ func VerifyJWT() gin.HandlerFunc {
 	}
 }
 
-func ExtractClaims(ctx *gin.Context) (string, error) {
+func ExtractClaims(ctx *gin.Context, identifier string) (string, error) {
+
 	if ctx.Request.Header["Token"] != nil {
 		tokenString := ctx.Request.Header["Token"][0]
-		fmt.Println(tokenString)
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("there's an error with the signing method")
 			}
+			fmt.Println(SecretKey, "is this secret key")
 			return SecretKey, nil
 		})
+
 		if err != nil {
 			return "Error Parsing Token: ", err
 		}
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if ok && token.Valid {
-			user := claims["user"].(string)
-			return user, nil
+			var tokenPayload string
+			if identifier == "id" {
+				tokenPayload = claims["id"].(string)
+			} else if identifier == "email" {
+				tokenPayload = claims["email"].(string)
+			} else if identifier == "role" {
+				tokenPayload = claims["roles"].(string)
+			}
+
+			return tokenPayload, nil
 		}
 	}
 

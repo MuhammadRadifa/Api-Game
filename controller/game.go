@@ -15,15 +15,15 @@ func GetAllGame(c *gin.Context) {
 
 	param, _ := strconv.Atoi(c.Param("id"))
 
-	Game, err := logic.GetAllGame(databases.DBConnection, param)
+	Data, err := logic.GetAllGame(databases.DBConnection, param)
 
 	if err != nil {
 		result = gin.H{
-			"result": err,
+			"error": err.Error(),
 		}
 	} else {
 		result = gin.H{
-			"result": Game,
+			"result": Data,
 		}
 	}
 

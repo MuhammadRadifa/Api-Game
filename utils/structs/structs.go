@@ -19,6 +19,8 @@ type Game struct {
 	Description string `json:"description"`
 	Category_id int    `json:"category_id"`
 	Category    []Category
+	Comment     []Comment
+	Rating      []Rating
 }
 
 type Comment struct {
@@ -33,4 +35,10 @@ type Rating struct {
 	Rate     int    `json:"rate"`
 	Users_id string `json:"users_id"`
 	Game_id  int    `json:"game_id"`
+}
+
+type Token struct {
+	Id    string
+	Role  string
+	Email string
 }

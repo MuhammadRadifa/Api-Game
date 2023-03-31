@@ -3,7 +3,6 @@
 
 CREATE TABLE rating (
     id SERIAL NOT NULL,
-    name VARCHAR(256),
     rate INT,
     users_id VARCHAR(256),
     game_id INT,

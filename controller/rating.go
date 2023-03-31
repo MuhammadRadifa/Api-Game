@@ -20,7 +20,7 @@ func InsertRating(c *gin.Context) {
 		panic(err)
 	}
 
-	Rating.Users_id, _ = middleware.ExtractClaims(c)
+	Rating.Users_id, _ = middleware.ExtractClaims(c, "id")
 
 	if err != nil {
 		panic(err)

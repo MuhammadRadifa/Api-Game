@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"game-api/databases"
 	"game-api/middleware"
 	"game-api/utils/logic"
@@ -12,6 +11,7 @@ import (
 )
 
 func InsertComment(c *gin.Context) {
+
 	var Comment structs.Comment
 
 	err := c.ShouldBindJSON(&Comment)
@@ -20,13 +20,11 @@ func InsertComment(c *gin.Context) {
 		panic(err)
 	}
 
-	Comment.Users_id, _ = middleware.ExtractClaims(c)
+	Comment.Users_id, _ = middleware.ExtractClaims(c, "id")
 
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Print(Comment.Users_id)
 
 	err = logic.InsertComment(databases.DBConnection, Comment)
 

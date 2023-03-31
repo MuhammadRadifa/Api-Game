@@ -2,11 +2,13 @@ package logic
 
 import (
 	"database/sql"
+	"errors"
+	"fmt"
 	"game-api/utils/structs"
 )
 
 func GetAllGame(db *sql.DB, param int) (result []structs.Game, err error) {
-	sqlStatement := "SELECT * FROM Game JOIN Category ON game.category_id = category.id WHERE game.id=($1);"
+	sqlStatement := "SELECT * FROM Game JOIN Category ON game.category_id = category.id JOIN comment ON game.id = comment.game_id JOIN rating ON game.id = rating.game_id WHERE game.id=($1);"
 
 	rows, err := db.Query(sqlStatement, param)
 
@@ -14,20 +16,33 @@ func GetAllGame(db *sql.DB, param int) (result []structs.Game, err error) {
 		panic(err)
 	}
 
-	for rows.Next() {
-		var Game = structs.Game{}
-		var Category = structs.Category{}
+	// if !rows.Next() {
 
-		err = rows.Scan(&Game.Id, &Game.Name, &Game.Description, &Game.Category_id, &Category.Id, &Category.Name)
+	// }
+
+	var Game = structs.Game{}
+	var Category = structs.Category{}
+	var Comment = structs.Comment{}
+	var Rating = structs.Rating{}
+
+	for rows.Next() {
+
+		err = rows.Scan(&Game.Id, &Game.Name, &Game.Description, &Game.Category_id, &Category.Id, &Category.Name, &Comment.Id, &Comment.Text, &Comment.Users_id, &Comment.Game_id, &Rating.Id, &Rating.Rate, &Rating.Users_id, &Rating.Game_id)
 
 		if err != nil {
 			panic(err)
 		}
+		fmt.Println(Comment)
 
-		Game.Category = append(Game.Category, Category)
-
-		result = append(result, Game)
+		Game.Comment = append(Game.Comment, Comment)
+		Game.Rating = append(Game.Rating, Rating)
 	}
+	if Game.Id == "" {
+		err = errors.New("id tidak ditemukan")
+	}
+
+	Game.Category = append(Game.Category, Category)
+	result = append(result, Game)
 
 	return
 }

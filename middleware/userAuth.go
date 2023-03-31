@@ -1,3 +1,3 @@
 package middleware
 
-//check token
+//is Admin Auth
